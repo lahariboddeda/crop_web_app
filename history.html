@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>History</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+</html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction History - Smart Crop Advisor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="fas fa-leaf"></i> Smart Crop Advisor
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/predict">Predict</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/history">History</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <h1 class="mb-4 text-center fade-in">
+      <i class="fas fa-history"></i> Prediction History
+    </h1>
+
+    <!-- Search and Filter Section -->
+    <div class="card shadow-lg border-0 mb-4 fade-in" style="animation-delay: 0.1s;">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-8 mb-3 mb-md-0">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="fas fa-search"></i>
+              </span>
+              <input type="text" class="form-control" id="searchInput" placeholder="Search by crop name...">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-danger w-100" id="clearAllBtn">
+              <i class="fas fa-trash"></i> Clear All History
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="card shadow-lg border-0 fade-in" style="animation-delay: 0.2s;">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-table"></i> Prediction Records</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" id="historyTable">
+            <thead class="table-light">
+              <tr>
+                <th>Date/Time</th>
+                <th>Nitrogen (N)</th>
+                <th>Phosphorus (P)</th>
+                <th>Potassium (K)</th>
+                <th>Temperature</th>
+                <th>Humidity</th>
+                <th>pH</th>
+                <th>Rainfall</th>
+                <th>Predicted Crop</th>
+                <th>Confidence</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="11" class="text-center py-4">
+                  <i class="fas fa-spinner fa-spin"></i> Loading data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State Message -->
+    <div id="emptyState" class="alert alert-info text-center py-5 d-none" style="animation-delay: 0.3s;">
+      <i class="fas fa-info-circle display-4 mb-3"></i>
+      <h5>No Predictions Yet</h5>
+      <p>Start making crop predictions to see your history here.</p>
+      <a href="/predict" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Make a Prediction
+      </a>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row mt-5 fade-in" style="animation-delay: 0.4s;">
+      <div class="col-md-6 mb-3">
+        <div class="card shadow-lg border-0">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Total Predictions</h6>
+            <h3 class="text-primary" id="totalCount">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card shadow-lg border-0">
+          <div class="card-body">
+            <h6 class="text-muted mb-2">Most Predicted Crop</h6>
+            <h3 class="text-success" id="mostCommon">-</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="gradient-navbar text-white text-center py-4 mt-5">
+    <div class="container">
+      <p>&copy; 2026 Smart Crop Advisor. Powered by Machine Learning & AI.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let allRecords = [];
+
+    // Load history on page load
+    function loadHistory() {
+      fetch('/api/history')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            allRecords = data.data;
+            displayRecords(allRecords);
+            updateStatistics();
+          }
+        });
+    }
+
+    function displayRecords(records) {
+      const tbody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+
+      if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4">No records found</td></tr>';
+        emptyState.classList.remove('d-none');
+        return;
+      }
+
+      emptyState.classList.add('d-none');
+      tbody.innerHTML = records.map((record, index) => `
+                <tr class="fade-in" style="animation-delay: ${index * 0.05}s;">
+                    <td><small>${new Date(record.timestamp).toLocaleString()}</small></td>
+                    <td>${record.n.toFixed(1)}</td>
+                    <td>${record.p.toFixed(1)}</td>
+                    <td>${record.k.toFixed(1)}</td>
+                    <td>${record.temperature.toFixed(1)}°C</td>
+                    <td>${record.humidity.toFixed(1)}%</td>
+                    <td>${record.ph.toFixed(2)}</td>
+                    <td>${record.rainfall.toFixed(1)} mm</td>
+                    <td><span class="badge bg-success">${record.crop}</span></td>
+                    <td>${record.confidence}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRecord(${record.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function deleteRecord(recordId) {
+      if (confirm('Are you sure you want to delete this record?')) {
+        fetch(`/api/delete/${recordId}`, {
+          method: 'DELETE'
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              loadHistory();
+            }
+          });
+      }
+    }
+
+    function updateStatistics() {
+      const totalCount = allRecords.length;
+      document.getElementById('totalCount').textContent = totalCount;
+
+      if (totalCount > 0) {
+        const cropCounts = {};
+        allRecords.forEach(record => {
+          cropCounts[record.crop] = (cropCounts[record.crop] || 0) + 1;
+        });
+        const mostCommon = Object.keys(cropCounts).reduce((a, b) =>
+          cropCounts[a] > cropCounts[b] ? a : b
+        );
+        document.getElementById('mostCommon').textContent = mostCommon.toUpperCase();
+      }
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = allRecords.filter(record =>
+        record.crop.toLowerCase().includes(searchTerm)
+      );
+      displayRecords(filtered);
+    });
+
+    // Clear all history
+    document.getElementById('clearAllBtn').addEventListener('click', function () {
+      if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+        fetch('/api/clear-history', {
+          method: 'DELETE'
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              loadHistory();
+              alert('History cleared successfully.');
+            }
+          });
+      }
+    });
+
+    // Load history when page loads
+    loadHistory();
+  </script>
+</body>
+
+</html>

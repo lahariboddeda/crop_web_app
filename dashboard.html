@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Crop Advisor - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="fas fa-leaf"></i> Smart Crop Advisor
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/predict">Predict</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/history">History</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero-section text-white py-5">
+    <div class="container text-center">
+      <h1 class="display-4 fw-bold mb-3 fade-in">🌾 Smart Crop Advisor</h1>
+      <p class="lead fade-in" style="animation-delay: 0.2s;">
+        Intelligent Agriculture System for Optimal Crop Selection
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container py-5">
+    <!-- Features Overview -->
+    <section class="mb-5">
+      <h2 class="mb-4 text-center">✨ Key Features</h2>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-brain"></i>
+            </div>
+            <h5>ML-Based Prediction</h5>
+            <p>Advanced Random Forest model for accurate crop recommendation based on soil and weather conditions.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <h5>Data Analysis</h5>
+            <p>Interactive visualizations and detailed analytics of crop recommendations and soil conditions.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-history"></i>
+            </div>
+            <h5>History Tracking</h5>
+            <p>Keep track of all your predictions with timestamps and detailed insights for future reference.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="mb-5">
+      <h2 class="mb-4 text-center">📊 System Statistics</h2>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="stat-card">
+            <div class="stat-value">{{ total_crops }}</div>
+            <div class="stat-label">Total Crops Supported</div>
+            <div class="stat-icon"><i class="fas fa-seedling"></i></div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="stat-card">
+            <div class="stat-value">{{ model_accuracy }}</div>
+            <div class="stat-label">Model Accuracy</div>
+            <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="stat-card">
+            <div class="stat-value">{{ total_predictions }}</div>
+            <div class="stat-label">Total Predictions Made</div>
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="text-center py-5">
+      <h2 class="mb-4">Get Started</h2>
+      <div class="cta-buttons">
+        <a href="/predict" class="btn btn-primary btn-lg me-3 hover-scale">
+          <i class="fas fa-play-circle"></i> Start Prediction
+        </a>
+        <a href="/history" class="btn btn-outline-primary btn-lg hover-scale">
+          <i class="fas fa-history"></i> View History
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="gradient-navbar text-white text-center py-4 mt-5">
+    <div class="container">
+      <p>&copy; 2026 Smart Crop Advisor. Powered by Machine Learning & AI.</p>
+      <p class="small">Helping farmers make intelligent crop decisions for sustainable agriculture.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

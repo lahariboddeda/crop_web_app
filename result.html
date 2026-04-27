@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result - Smart Crop Advisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-leaf"></i> Smart Crop Advisor
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/predict">Predict</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history">History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="mb-4 text-center">
+                    <i class="fas fa-check-circle text-success"></i> Prediction Result
+                </h1>
+
+                <!-- Recommended Crop Card -->
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body text-center p-5">
+                        <h3 class="mb-2">Recommended Crop</h3>
+                        <h1 class="display-3 text-success mb-3">
+                            {{ crop|upper }}
+                        </h1>
+                        <div class="confidence-badge">
+                            <h5>Confidence Level</h5>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: {{ confidence * 100 }}%;" aria-valuenow="{{ confidence * 100 }}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ "%.2f"|format(confidence * 100) }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crop Details Section -->
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Crop Details & Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-2">Description</h6>
+                                <p>{{ details.description }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-2">Crop Duration</h6>
+                                <p class="h5 text-success">
+                                    <i class="fas fa-calendar"></i> {{ details.duration }} days
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="detail-box">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-thermometer"></i> Temperature Range
+                                    </h6>
+                                    <p class="h6 text-success">{{ details.temp_range }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="detail-box">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-droplet"></i> Water Requirement
+                                    </h6>
+                                    <p class="h6 text-success">{{ details.water }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="detail-box">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-flask"></i> Fertilizer (NPK)
+                                    </h6>
+                                    <p class="h6 text-success">{{ details.fertilizer }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-lg border-0">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Crop Distribution</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="cropChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-lg border-0">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-chart-pie"></i> Feature Importance</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="importanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Section -->
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Analysis & Recommendations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="analysisContent">
+                            <p>{{ crop }} is recommended based on your soil and environmental conditions.</p>
+                            <ul>
+                                <li>✅ Monitor soil moisture regularly</li>
+                                <li>✅ Apply fertilizers as per recommended schedule</li>
+                                <li>✅ Watch for pest and disease indicators</li>
+                                <li>✅ Harvest at optimal maturity stage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <a href="/predict" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-plus"></i> Make Another Prediction
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <a href="/download-report?crop={{ crop }}&confidence={{ confidence }}"
+                            class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-download"></i> Download Report (PDF)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="gradient-navbar text-white text-center py-4 mt-5">
+        <div class="container">
+            <p>&copy; 2026 Smart Crop Advisor. Powered by Machine Learning & AI.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- INLINE CHART FUNCTIONS -->
+    <script>
+        console.log("✅ Page loading...");
+
+        let cropChartInstance = null;
+        let importanceChartInstance = null;
+
+        function createCropChart(crops, counts) {
+            console.log("Creating crop chart with:", crops, counts);
+
+            const canvas = document.getElementById('cropChart');
+            if (!canvas) {
+                console.error("❌ cropChart canvas not found");
+                return;
+            }
+
+            if (cropChartInstance) {
+                cropChartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            try {
+                cropChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: crops || ['No Data'],
+                        datasets: [{
+                            label: 'Predictions',
+                            data: counts || [0],
+                            backgroundColor: '#2ecc71',
+                            borderColor: '#27ae60',
+                            borderWidth: 2,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        }
+                    }
+                });
+                console.log("✅ Crop chart created successfully");
+            } catch (error) {
+                console.error("❌ Error creating crop chart:", error);
+            }
+        }
+
+        function createImportanceChart() {
+            console.log("Creating importance chart");
+
+            const canvas = document.getElementById('importanceChart');
+            if (!canvas) {
+                console.error("❌ importanceChart canvas not found");
+                return;
+            }
+
+            if (importanceChartInstance) {
+                importanceChartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            try {
+                importanceChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['N', 'P', 'K', 'Temp', 'Humidity', 'pH', 'Rainfall'],
+                        datasets: [{
+                            data: [15, 12, 14, 18, 16, 10, 15],
+                            backgroundColor: [
+                                '#2ecc71',
+                                '#3498db',
+                                '#e74c3c',
+                                '#f39c12',
+                                '#9b59b6',
+                                '#1abc9c',
+                                '#e67e22'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+                console.log("✅ Importance chart created successfully");
+            } catch (error) {
+                console.error("❌ Error creating importance chart:", error);
+            }
+        }
+
+        // Main initialization
+        console.log("Page fully loaded, initializing charts...");
+
+        const crop = "{{ crop }}";
+        const confidence = {{ confidence }};
+
+        console.log("🌾 Crop:", crop);
+        console.log("📊 Confidence:", confidence);
+
+        // Fetch data
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                console.log("📊 Data received:", data);
+
+                if (data.success && data.crops && data.crops.length > 0) {
+                    console.log("✅ Real data available, creating charts...");
+                    createCropChart(data.crops, data.counts);
+                } else {
+                    console.log("⚠️ No real data, using defaults...");
+                    createCropChart(['Rice', 'Maize', 'Chickpea', 'Banana'], [1, 1, 1, 1]);
+                }
+
+                createImportanceChart();
+            })
+            .catch(error => {
+                console.error("❌ Error fetching data:", error);
+                console.log("Creating default charts as fallback");
+                createCropChart(['Rice', 'Maize', 'Chickpea', 'Banana'], [1, 1, 1, 1]);
+                createImportanceChart();
+            });
+    </script>
+</body>
+
+</html>

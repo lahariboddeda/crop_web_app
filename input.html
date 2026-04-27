@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Prediction - Smart Crop Advisor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="fas fa-leaf"></i> Smart Crop Advisor
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/predict">Predict</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/history">History</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1 class="mb-4 text-center fade-in">
+          <i class="fas fa-leaf"></i> Crop Prediction Form
+        </h1>
+
+        <div class="card shadow-lg border-0 fade-in" style="animation-delay: 0.1s;">
+          <div class="card-body p-4">
+            <form id="predictionForm">
+              <!-- Soil Nutrients Section -->
+              <div class="mb-4">
+                <h5 class="mb-3">
+                  <i class="fas fa-flask"></i> Soil Nutrients (kg/ha)
+                </h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="n" class="form-label">
+                      Nitrogen (N)
+                      <i class="fas fa-info-circle ms-2" title="Amount of nitrogen in soil"
+                        data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="n" name="n" min="0" max="500" step="0.1" required
+                      placeholder="e.g., 90">
+                    <small class="text-muted">Range: 0-500 kg/ha</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="p" class="form-label">
+                      Phosphorus (P)
+                      <i class="fas fa-info-circle ms-2" title="Amount of phosphorus in soil"
+                        data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="p" name="p" min="0" max="500" step="0.1" required
+                      placeholder="e.g., 42">
+                    <small class="text-muted">Range: 0-500 kg/ha</small>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="k" class="form-label">
+                      Potassium (K)
+                      <i class="fas fa-info-circle ms-2" title="Amount of potassium in soil"
+                        data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="k" name="k" min="0" max="500" step="0.1" required
+                      placeholder="e.g., 43">
+                    <small class="text-muted">Range: 0-500 kg/ha</small>
+                  </div>
+                </div>
+              </div>
+
+              <hr>
+
+              <!-- Environmental Conditions Section -->
+              <div class="mb-4">
+                <h5 class="mb-3">
+                  <i class="fas fa-cloud"></i> Environmental Conditions
+                </h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="temperature" class="form-label">
+                      Temperature (°C)
+                      <i class="fas fa-info-circle ms-2" title="Average daily temperature" data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="temperature" name="temperature" min="-20" max="60"
+                      step="0.1" required placeholder="e.g., 25.5">
+                    <small class="text-muted">Range: -20 to 60°C</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="humidity" class="form-label">
+                      Humidity (%)
+                      <i class="fas fa-info-circle ms-2" title="Relative humidity percentage"
+                        data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="humidity" name="humidity" min="0" max="100" step="0.1"
+                      required placeholder="e.g., 60">
+                    <small class="text-muted">Range: 0-100%</small>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="ph" class="form-label">
+                      Soil pH
+                      <i class="fas fa-info-circle ms-2" title="Soil acidity/alkalinity" data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="ph" name="ph" min="0" max="14" step="0.1" required
+                      placeholder="e.g., 6.5">
+                    <small class="text-muted">Range: 0-14 (7 = Neutral)</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="rainfall" class="form-label">
+                      Rainfall (mm)
+                      <i class="fas fa-info-circle ms-2" title="Annual rainfall" data-bs-toggle="tooltip"></i>
+                    </label>
+                    <input type="number" class="form-control" id="rainfall" name="rainfall" min="0" max="10000"
+                      step="0.1" required placeholder="e.g., 90.2">
+                    <small class="text-muted">Range: 0-10000 mm</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                  <i class="fas fa-leaf"></i> Predict Crop
+                </button>
+              </div>
+
+              <!-- Error Alert -->
+              <div id="errorAlert" class="alert alert-danger mt-3 d-none" role="alert">
+                <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
+              </div>
+
+              <!-- Success Alert -->
+              <div id="successAlert" class="alert alert-success mt-3 d-none" role="alert">
+                <i class="fas fa-check-circle"></i> Predicting... Please wait.
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-5 alert alert-info">
+          <h6 class="mb-3"><i class="fas fa-lightbulb"></i> Tips for Better Predictions:</h6>
+          <ul class="mb-0">
+            <li>Ensure soil nutrient values (N, P, K) are measured in kg/ha</li>
+            <li>Use average temperature and humidity for the season</li>
+            <li>Soil pH should typically range from 5.5 to 8.5</li>
+            <li>Rainfall values should be annual averages</li>
+            <li>All fields must be filled with valid numeric values</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="gradient-navbar text-white text-center py-4 mt-5">
+    <div class="container">
+      <p>&copy; 2026 Smart Crop Advisor. Powered by Machine Learning & AI.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    document.getElementById('predictionForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      // Validate inputs
+      const n = parseFloat(document.getElementById('n').value);
+      const p = parseFloat(document.getElementById('p').value);
+      const k = parseFloat(document.getElementById('k').value);
+      const temperature = parseFloat(document.getElementById('temperature').value);
+      const humidity = parseFloat(document.getElementById('humidity').value);
+      const ph = parseFloat(document.getElementById('ph').value);
+      const rainfall = parseFloat(document.getElementById('rainfall').value);
+
+      const errorAlert = document.getElementById('errorAlert');
+      const successAlert = document.getElementById('successAlert');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Validation checks
+      if (isNaN(n) || isNaN(p) || isNaN(k) || isNaN(temperature) ||
+        isNaN(humidity) || isNaN(ph) || isNaN(rainfall)) {
+        errorMessage.textContent = 'Please fill all fields with valid numbers.';
+        errorAlert.classList.remove('d-none');
+        successAlert.classList.add('d-none');
+        return;
+      }
+
+      if (n < 0 || p < 0 || k < 0 || temperature < -20 || temperature > 60 ||
+        humidity < 0 || humidity > 100 || ph < 0 || ph > 14 || rainfall < 0) {
+        errorMessage.textContent = 'Please ensure all values are within valid ranges.';
+        errorAlert.classList.remove('d-none');
+        successAlert.classList.add('d-none');
+        return;
+      }
+
+      errorAlert.classList.add('d-none');
+      successAlert.classList.remove('d-none');
+      document.getElementById('submitBtn').disabled = true;
+
+      try {
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            n, p, k, temperature, humidity, ph, rainfall
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          window.location.href = `/result?crop=${data.crop}&confidence=${data.confidence}`;
+        } else {
+          errorMessage.textContent = data.error || 'Prediction failed. Please try again.';
+          errorAlert.classList.remove('d-none');
+          successAlert.classList.add('d-none');
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Error: ' + error.message;
+        errorAlert.classList.remove('d-none');
+        successAlert.classList.add('d-none');
+      } finally {
+        document.getElementById('submitBtn').disabled = false;
+      }
+    });
+
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  </script>
+</body>
+
+</html>
